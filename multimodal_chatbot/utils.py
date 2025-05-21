@@ -20,23 +20,22 @@ os.makedirs(data, exist_ok=True)
 os.makedirs(media, exist_ok=True)
 
 # LLMs
-llm = OllamaLLM(model="phi")         # Fast, for text + fallback
-img_llm = OllamaLLM(model="llava")   # Multimodal for images
+llm = OllamaLLM(model="phi")
+img_llm = OllamaLLM(model="llava")
 
-# Embedding & Vector Store
+# Embeddings and vector store
 embeddings = OllamaEmbeddings(model="phi")
 vector_store = InMemoryVectorStore(embeddings)
 
-# Flexible prompt
-template = """
-You are a helpful assistant. If relevant context is provided, use it. If not, answer to the best of your knowledge.
+# Prompt template
+template = """You are a helpful but concise assistant. Answer only using the provided context.
+If the context is not relevant or does not answer the question, say "I don't know."
+Keep your answers direct and under 3 sentences.
 Question: {question}
 Context: {context}
-Answer:
-"""
+Answer:"""
 
-# ========== File Parsing ==========
-
+# File parsing
 def save_file(file):
     file_path = os.path.join(data, file.name)
     with open(file_path, "wb") as f:
@@ -92,7 +91,8 @@ def parse_docx(file_path):
 def parse_csv(file_path):
     try:
         df = pd.read_csv(file_path)
-        return df.to_markdown(index=False)
+        summary = f"The dataset contains {df.shape[0]} rows and {df.shape[1]} columns.\n"
+        return summary + df.head(5).to_markdown(index=False)
     except Exception as e:
         return f"[CSV parsing error: {e}]"
 
@@ -105,35 +105,36 @@ def parse_webpage(url):
     except Exception as e:
         return f"[Web parsing error: {e}]"
 
-# ========== Vector Ops ==========
-
+# Vector operations
 def split_text(text):
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     return splitter.split_text(text)
 
-def store_chunks(chunks):
-    docs = [Document(page_content=chunk) for chunk in chunks]
+def store_chunks(chunks, source=None):
+    docs = [
+        Document(page_content=chunk, metadata={"source": source} if source else {})
+        for chunk in chunks
+    ]
     vector_store.add_documents(docs)
 
 def retrieve_chunks(query):
-    return vector_store.similarity_search(query, k=3)
+    return vector_store.similarity_search(query, k=2)
 
 def answer_question(question, docs):
     if not docs:
-        # fallback: answer without context
-        return llm.invoke(question)
-
+        return "I don't know."
     context = "\n\n".join([doc.page_content for doc in docs])
+    sources = set(doc.metadata.get("source", "Unknown") for doc in docs)
     prompt = ChatPromptTemplate.from_template(template)
     chain = prompt | llm
-    return chain.invoke({"question": question, "context": context})
+    answer = chain.invoke({"question": question, "context": context})
+    return answer + f"\n\nSources: {', '.join(sources)}"
 
 def reset_vector_store():
     global vector_store
     vector_store = InMemoryVectorStore(embeddings)
 
-# ========== Reusable Upload Handler ==========
-
+# Reusable upload handler
 def handle_multiple_files(file_list, parse_func):
     success_files = []
     for file in file_list:
@@ -141,6 +142,6 @@ def handle_multiple_files(file_list, parse_func):
         content = parse_func(file_path)
         if content.strip() and "Unsupported" not in content:
             chunks = split_text(content)
-            store_chunks(chunks)
+            store_chunks(chunks, source=file.name)
             success_files.append(file.name)
     return success_files

@@ -12,13 +12,6 @@ if "chat_history" not in st.session_state:
 if "indexed_files" not in st.session_state:
     st.session_state.indexed_files = []
 
-# Reset everything
-if st.button("Reset Memory"):
-    reset_vector_store()
-    st.session_state.chat_history = []
-    st.session_state.indexed_files = []
-    st.success("Memory, chat, and file tracking cleared.")
-
 # Chat input
 user_question = st.text_input("Ask me anything", key="question_input")
 
@@ -93,7 +86,7 @@ if user_question:
 for role, msg in st.session_state.chat_history:
     st.chat_message(role).write(msg)
 
-# Download history
+# Download chat history
 if st.session_state.chat_history:
     chat_text = "\n\n".join(f"{role.upper()}: {msg}" for role, msg in st.session_state.chat_history)
     st.download_button("Download Chat History", data=chat_text, file_name="chat_history.txt")
@@ -102,4 +95,4 @@ if st.session_state.chat_history:
 if st.session_state.indexed_files:
     st.markdown("### Indexed Files / Sources")
     for name in set(st.session_state.indexed_files):
-        st.write(f"• {name}")
+        st.write(f"- {name}")
