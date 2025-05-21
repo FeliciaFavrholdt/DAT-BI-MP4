@@ -100,7 +100,7 @@ Navigate through the sidebar to access:
 
 ```
 multimodal_chatbot/
-├── app.py
+├── .gitignore
 ├── utils.py
 ├── memory.py
 ├── Dashboard.py
