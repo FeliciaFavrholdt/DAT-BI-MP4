@@ -6,11 +6,7 @@ We used pair programming to complete this project. Felicia led the implementatio
 **GitHub Repository:**  
 https://github.com/FeliciaFavrholdt/DAT-BI-MP4
 
-
-**GitHub Repository:**  
-https://github.com/FeliciaFavrholdt/DAT-BI-MP4
-
-![Multimodal Chatbot Screenshot](photo.png)
+![Multimodal Chatbot Screenshot](../photo.png)
 
 
 ---
