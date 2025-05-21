@@ -17,7 +17,6 @@ vector_store/
 *.pdf
 *.jpg
 *.jpeg
-*.png
 *.csv
 *.docx
 *.txt
