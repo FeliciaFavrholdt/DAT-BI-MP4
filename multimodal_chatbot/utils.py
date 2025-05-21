@@ -16,23 +16,20 @@ from unstructured.partition.utils.constants import PartitionStrategy
 data = './data/'
 media = './media/'
 
-# Ensure directories exist
 os.makedirs(data, exist_ok=True)
 os.makedirs(media, exist_ok=True)
 
 # LLMs
-llm = OllamaLLM(model="phi")         # Fast and small for text
+llm = OllamaLLM(model="phi")         # Fast, for text + fallback
 img_llm = OllamaLLM(model="llava")   # Multimodal for images
 
-# Embedding model and in-memory vector store
+# Embedding & Vector Store
 embeddings = OllamaEmbeddings(model="phi")
 vector_store = InMemoryVectorStore(embeddings)
 
-# Strict, concise template
+# Flexible prompt
 template = """
-You are a factual assistant. Use only the provided context to answer the user's question.
-If the context is not relevant or does not answer the question, respond with "I don't know."
-Limit your answer to two sentences maximum.
+You are a helpful assistant. If relevant context is provided, use it. If not, answer to the best of your knowledge.
 Question: {question}
 Context: {context}
 Answer:
@@ -123,7 +120,9 @@ def retrieve_chunks(query):
 
 def answer_question(question, docs):
     if not docs:
-        return "I don't know."
+        # fallback: answer without context
+        return llm.invoke(question)
+
     context = "\n\n".join([doc.page_content for doc in docs])
     prompt = ChatPromptTemplate.from_template(template)
     chain = prompt | llm
@@ -133,7 +132,7 @@ def reset_vector_store():
     global vector_store
     vector_store = InMemoryVectorStore(embeddings)
 
-# ========== Reusable File Processor ==========
+# ========== Reusable Upload Handler ==========
 
 def handle_multiple_files(file_list, parse_func):
     success_files = []
