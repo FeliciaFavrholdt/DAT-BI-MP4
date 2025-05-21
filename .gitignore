@@ -1,0 +1,40 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env/
+.venv/
+
+# Local data and media files
+/data/
+media/
+vector_store/
+
+# PDF/image/tmp artifacts
+*.pdf
+*.jpg
+*.jpeg
+*.png
+*.csv
+*.docx
+*.txt
+
+# Logs and cache
+*.log
+*.bak
+*.swp
+*.tmp
+.DS_Store
+.cache/
+.streamlit/
+
+# VSCode / PyCharm
+.vscode/
+.idea/
+
+# Mac system files
+Icon?
+._*
