@@ -6,6 +6,9 @@ We used pair programming to complete this project. Felicia led the implementatio
 **GitHub Repository:**  
 https://github.com/FeliciaFavrholdt/DAT-BI-MP4
 
+
+![alt text](../photo.png)
+
 ---
 
 ### Project Description
